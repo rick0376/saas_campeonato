@@ -20,7 +20,6 @@ export default async function handler(
   }
 
   try {
-    // ✅ CORREÇÃO: Usar getServerSession em vez de getSession
     const session = await getServerSession(req, res, authOptions);
 
     if (!session || session.user?.role !== "admin") {
@@ -41,7 +40,7 @@ export default async function handler(
       return res.status(400).json({ error: "Lista de jogos é obrigatória" });
     }
 
-    // Validar dados dos jogos
+    // Validar dados dos jogos e garantir que grupos e equipes existam
     for (const jogo of jogos) {
       if (
         !jogo.equipeAId ||
@@ -59,10 +58,10 @@ export default async function handler(
           .json({ error: "Uma equipe não pode jogar contra si mesma" });
       }
 
-      // Verificar se as equipes existem
-      const [equipeA, equipeB] = await Promise.all([
+      const [equipeA, equipeB, grupo] = await Promise.all([
         prisma.equipe.findUnique({ where: { id: jogo.equipeAId } }),
         prisma.equipe.findUnique({ where: { id: jogo.equipeBId } }),
+        prisma.grupo.findUnique({ where: { id: jogo.grupoId } }),
       ]);
 
       if (!equipeA || !equipeB) {
@@ -71,10 +70,6 @@ export default async function handler(
           .json({ error: "Uma ou mais equipes não foram encontradas" });
       }
 
-      // Verificar se o grupo existe
-      const grupo = await prisma.grupo.findUnique({
-        where: { id: jogo.grupoId },
-      });
       if (!grupo) {
         return res.status(400).json({ error: "Grupo não encontrado" });
       }
@@ -104,6 +99,18 @@ export default async function handler(
       });
     }
 
+    // Recuperar clientId do primeiro grupo para usar na criação dos jogos
+    const primeiroGrupo = await prisma.grupo.findUnique({
+      where: { id: jogos[0].grupoId },
+    });
+
+    if (!primeiroGrupo) {
+      return res
+        .status(400)
+        .json({ error: "Grupo do primeiro jogo não encontrado" });
+    }
+    const clientId = primeiroGrupo.clientId;
+
     // Criar todos os jogos em uma transação
     const jogosCreated = await prisma.$transaction(
       jogos.map((jogo) =>
@@ -114,6 +121,7 @@ export default async function handler(
             grupoId: jogo.grupoId,
             rodada: jogo.rodada,
             data: new Date(jogo.data),
+            clientId: clientId,
           },
           include: {
             equipeA: true,
