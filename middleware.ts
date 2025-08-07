@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
     "/jogos-publicos",
   ];
 
+  // Permite acesso liberado para rotas públicas e assets estáticos
   if (
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/imagens/") ||
@@ -29,7 +30,7 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
   } catch (error) {
-    console.log("Erro ao obter token no middleware:", error);
+    console.error("Erro ao obter token no middleware:", error);
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
@@ -40,26 +41,18 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/backup") {
     if (token.role === "admin") {
-      console.log("Middleware - Super Admin permitido em backup");
       return NextResponse.next();
     }
 
     if (token.clientId && token.clientId !== null && token.clientId !== "") {
-      console.log(
-        "Middleware - Cliente permitido em backup dos próprios dados"
-      );
       return NextResponse.next();
     }
 
-    console.log(
-      "Middleware - Usuário sem cliente definido, negando acesso ao backup"
-    );
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (pathname === "/admin/gerar-jogos") {
     if (token.role === "admin") {
-      console.log("Middleware - Super Admin permitido em gerar-jogos");
       return NextResponse.next();
     }
 
@@ -74,14 +67,12 @@ export async function middleware(request: NextRequest) {
       const temPermissao = permissoes["gerar-jogos"]?.["criar"] === true;
 
       if (temPermissao) {
-        console.log("Middleware - Usuário tem permissão para gerar-jogos");
         return NextResponse.next();
       }
-    } catch (error) {
-      console.log("Middleware - Erro ao verificar permissões:", error);
+    } catch {
+      // Se erro na permissão, bloqueia acesso
     }
 
-    console.log("Middleware - Sem permissão para gerar-jogos");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -92,12 +83,10 @@ export async function middleware(request: NextRequest) {
       token.role === "admin" && (clientId === null || clientId === "undefined");
 
     if (!isSuperAdmin) {
-      console.log("Middleware - Usuário não é Super Admin, redirecionando");
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
-  console.log("Middleware - Permitindo acesso autorizado");
   return NextResponse.next();
 }
 
