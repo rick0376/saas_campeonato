@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     "/jogos-publicos",
   ];
 
-  // Rotas de sistema que devem ser ignoradas
+  // Ignorar rotas do sistema e públicas
   if (
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/imagens/") ||
@@ -25,12 +25,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Verificar token para rotas protegidas
+  // Obter token JWT validado com secret
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
+  // Se não tem token, redirecionar para login
   if (!token) {
     console.log("Middleware - Sem token, redirecionando para login");
     return NextResponse.redirect(new URL("/auth/login", request.url));
@@ -81,12 +82,11 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       console.log("Middleware - Erro ao verificar permissões:", error);
     }
-
     console.log("Middleware - Sem permissão para gerar-jogos");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Verificação para outras rotas administrativas (começando com /admin)
+  // Para outras rotas administrativas, somente super admins
   if (pathname.startsWith("/admin")) {
     const isSuperAdmin = token.role === "admin" && clientId === null;
 
@@ -96,10 +96,21 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Permitir acesso autorizado
   console.log("Middleware - Permitindo acesso autorizado");
   return NextResponse.next();
 }
 
+// Define as rotas onde o middleware será aplicado
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Aplica o middleware a todas as rotas, exceto as que:
+     * - iniciam com /api
+     * - são arquivos estáticos
+     * - são imagens otimizadas pelo Next.js
+     * - favicon
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
