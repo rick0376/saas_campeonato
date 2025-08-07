@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== MODELO DE CLIENTES (TENANTS) ==========
+
+model Client {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  logo        String?   // URL da imagem no Cloudinary
+  logoPublicId String?  // Public ID do Cloudinary para deletar
+  description String?
+  domain      String?   @unique
+  status      ClientStatus @default(ACTIVE)
+  
+  // Controle de validade
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime? // Data de expiração
+  validDays   Int?      // Dias de validade (para cálculos)
+  
+  // Configurações adicionais
+  maxUsers    Int?      @default(10)    // Limite de usuários
+  maxTeams    Int?      @default(20)    // Limite de equipes
+  features    String?   // JSON com features habilitadas
+  
+  // Relações
+  users       User[]
+  grupos      Grupo[]
+  equipes     Equipe[]
+  jogos       Jogo[]
+  jogadores   Jogador[]
+  eventos     EventoJogo[]
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  EXPIRED
+  TRIAL
+}
+
+// ========== MODELOS DE AUTENTICAÇÃO ==========
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String?  @unique
+  emailVerified DateTime?
+  image        String?
+  password     String?
+  role         Role     @default(user)
+  permissoes   String?
+  clientId     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+
+  client       Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ========== MODELOS DO CAMPEONATO (com tenantId) ==========
+
+model Grupo {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  descricao String? 
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt   
+  equipes   Equipe[]
+  jogos     Jogo[]
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([nome, clientId])
+}
+
+model Equipe {
+  id            Int       @id @default(autoincrement())
+  nome          String
+  pontos        Int       @default(0)
+  vitorias      Int       @default(0)
+  empates       Int       @default(0)
+  derrotas      Int       @default(0)
+  golsMarcados  Int       @default(0)
+  golsSofridos  Int       @default(0)
+  escudoUrl     String?
+  public_id     String?
+  grupoId       Int?
+  clientId      String    // ✅ REMOVER ? - Sempre obrigatório
+
+  grupo         Grupo?     @relation(fields: [grupoId], references: [id], onDelete: SetNull)
+  jogosCasa     Jogo[]     @relation("EquipeCasa")
+  jogosFora     Jogo[]     @relation("EquipeFora")
+  jogadores     Jogador[]
+  eventos       EventoJogo[]
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  @@unique([nome, clientId])
+}
+
+model Jogo {
+  id        Int      @id @default(autoincrement())
+  equipeAId Int
+  equipeBId Int
+  grupoId   Int
+  rodada    Int
+  data      DateTime
+  placarA   Int?
+  placarB   Int?
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  equipeA  Equipe       @relation("EquipeCasa", fields: [equipeAId], references: [id], onDelete: Cascade)
+  equipeB  Equipe       @relation("EquipeFora", fields: [equipeBId], references: [id], onDelete: Cascade)
+  grupo    Grupo        @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  eventos  EventoJogo[]
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("jogos")
+}
+
+model Jogador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  numero    Int
+  posicao   String
+  idade     Int?
+  altura    Float?
+  peso      Float?
+  fotoUrl   String?
+  public_id String?
+  ativo     Boolean  @default(true)
+  equipeId  Int
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  equipe  Equipe       @relation(fields: [equipeId], references: [id], onDelete: Cascade)
+  eventos EventoJogo[]
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([equipeId, numero, clientId])
+  @@map("jogadores")
+}
+
+model EventoJogo {
+  id        Int      @id @default(autoincrement())
+  jogoId    Int
+  jogadorId Int
+  equipeId  Int
+  tipo      String   // "gol", "cartao_amarelo", "cartao_vermelho", "assistencia"
+  minuto    Int
+  detalhes  String?
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jogo    Jogo    @relation(fields: [jogoId], references: [id], onDelete: Cascade)
+  jogador Jogador @relation(fields: [jogadorId], references: [id], onDelete: Cascade)
+  equipe  Equipe  @relation(fields: [equipeId], references: [id], onDelete: Cascade)
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("eventos_jogo")
+}

@@ -1,0 +1,149 @@
+.chartsSection {
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.chartCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.chartTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+  text-align: center;
+  border-bottom: 2px solid #f3f4f6;
+  padding-bottom: 0.75rem;
+}
+
+.chartContainer {
+  height: 300px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    height: 250px;
+  }
+}
+
+// ========== RANKING LIST ==========
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rankingItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    transform: translateX(4px);
+  }
+}
+
+.position {
+  font-weight: 700;
+  color: #3b82f6;
+  min-width: 30px;
+  text-align: center;
+  background: white;
+  border-radius: 6px;
+  padding: 0.25rem;
+  border: 1px solid #e5e7eb;
+}
+
+.playerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+
+  strong {
+    color: #111827;
+    font-size: 0.875rem;
+  }
+
+  span {
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+}
+
+.goals {
+  font-weight: 700;
+  color: #10b981;
+  font-size: 0.875rem;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+// ========== RESPONSIVIDADE ==========
+@media (max-width: 640px) {
+  .chartsGrid {
+    gap: 0.75rem;
+  }
+
+  .chartCard {
+    padding: 0.75rem;
+  }
+
+  .chartContainer {
+    height: 200px;
+  }
+
+  .rankingItem {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .playerInfo {
+    align-items: center;
+  }
+}

@@ -1,0 +1,558 @@
+// ========== CONTAINER PRINCIPAL ==========
+.container {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// ========== HEADER ==========
+.header {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+/* Primeira linha do header */
+.headerTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* alinhar tudo ao centro horizontalmente */
+  gap: 1rem;
+  flex-wrap: wrap; /* permitir quebra em tela menor */
+  position: relative;
+  z-index: 2;
+}
+
+/* Ícone atualizado para fundo transparente e centralizado */
+.headerIcon {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px; /* garantir tamanho fixo para alinhar */
+  min-height: 56px;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+/* Conteúdo (título e subtítulo) */
+.headerContent {
+  flex-grow: 1;
+  text-align: center;
+  user-select: none;
+
+  .title {
+    margin: 0 0 0.25rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.85;
+  }
+}
+
+/* Botão de atualizar */
+.refreshButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  align-self: center; /* alinhar verticalmente */
+  user-select: none;
+  transition: all 0.2s ease;
+  min-width: 48px;
+  height: 48px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* Spinning effect para o ícone */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* Seletor de cliente */
+.clientSelector {
+  margin-top: 1rem;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+    text-align: center;
+  }
+
+  .react-select__control {
+    border-radius: 8px;
+    min-height: 40px;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+
+    &:focus,
+    &.react-select__control--is-focused {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: none;
+    }
+  }
+
+  .react-select__single-value {
+    color: white;
+  }
+
+  .react-select__menu {
+    background-color: white;
+    color: black;
+    margin-top: 4px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 11px rgba(0, 0, 0, 0.1);
+    z-index: 9999; /* Garante que fique em cima */
+  }
+
+  .react-select__option {
+    color: black;
+    cursor: pointer;
+
+    &:hover,
+    &.react-select__option--is-focused {
+      background-color: #f0f0f0;
+      color: black;
+    }
+
+    &.react-select__option--is-selected {
+      background-color: #ddd;
+      color: black;
+      font-weight: bold;
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .headerTopRow {
+    justify-content: center;
+  }
+
+  .refreshButton {
+    margin-top: 1rem;
+    width: 48px;
+    height: 48px;
+  }
+
+  .clientSelector {
+    margin-top: 1rem;
+  }
+}
+
+/* Animação Spin */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ========== KPI GRID ==========
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ========== KPI CARDS ==========
+.kpiCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+}
+
+.kpiIcon {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.kpiContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    align-items: center;
+  }
+}
+
+.kpiNumber {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+.kpiLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpiDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+
+  span {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  @media (max-width: 768px) {
+    align-items: center;
+  }
+}
+
+// ========== STATUS BAR ==========
+.statusBar {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+.statusLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.statusValue {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 600;
+
+  &.online {
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// ========== RESPONSIVIDADE ==========
+@media (max-width: 640px) {
+  .kpiGrid {
+    gap: 0.75rem;
+  }
+
+  .kpiCard {
+    padding: 0.75rem;
+  }
+
+  .kpiNumber {
+    font-size: 1.25rem;
+  }
+
+  .statusBar {
+    padding: 0.75rem;
+  }
+}
+.accessDeniedContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  padding: 20px;
+  background-color: #fef2f2; /* vermelho claro */
+}
+
+.accessDeniedBox {
+  text-align: center;
+  background: #fee2e2; /* vermelho mais forte */
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(244, 63, 94, 0.15);
+  max-width: 380px;
+  width: 100%;
+}
+
+.accessDeniedTitle {
+  font-size: 1.8rem;
+  color: #b91c1c; /* vermelho escuro */
+  margin-bottom: 16px;
+}
+
+.accessDeniedMessage {
+  color: #991b1b;
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.redirectInfo {
+  font-size: 0.9rem;
+  color: #7f1d1d;
+  margin-bottom: 24px;
+}
+
+.backHomeButton {
+  background-color: #dc2626; /* vermelho */
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.backHomeButton:hover {
+  background-color: #b91c1c; /* vermelho mais escuro */
+}
+.clientSelector {
+  position: relative;
+  z-index: 10;
+  max-width: 360px;
+  margin: 1rem auto 0;
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+    text-align: center;
+  }
+
+  .react-select__control {
+    border-radius: 8px;
+    min-height: 40px;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+
+    &:focus,
+    &.react-select__control--is-focused {
+      border-color: rgba(255, 255, 255, 0.6);
+      box-shadow: none;
+    }
+  }
+
+  .react-select__single-value {
+    color: white;
+  }
+
+  .react-select__menu {
+    background-color: white;
+    color: black;
+    margin-top: 4px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 11px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+  }
+
+  .react-select__option {
+    color: black;
+    cursor: pointer;
+
+    &:hover,
+    &.react-select__option--is-focused {
+      background-color: #f0f0f0;
+      color: black;
+    }
+
+    &.react-select__option--is-selected {
+      background-color: #ddd;
+      color: black;
+      font-weight: bold;
+    }
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  z-index: 10000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  color: black;
+  text-align: center;
+}
+
+.modalContent button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}

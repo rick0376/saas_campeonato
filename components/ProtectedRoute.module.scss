@@ -1,0 +1,157 @@
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+
+  p {
+    margin-top: 1rem;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.accessDenied {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.accessDeniedContent {
+  text-align: center;
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  border: 1px solid #e5e7eb;
+
+  h2 {
+    color: #dc3545;
+    margin: 1rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: #64748b;
+    margin: 0.75rem 0;
+    line-height: 1.6;
+    font-size: 1rem;
+
+    strong {
+      color: #374151;
+      font-weight: 600;
+    }
+  }
+}
+
+.accessDeniedIcon {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.accessDeniedActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+  }
+}
+
+.homeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #5b5bd6, #7c3aed);
+    transform: translateY(-1px);
+  }
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .accessDeniedContent {
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .accessDeniedActions {
+    flex-direction: column;
+
+    .backButton,
+    .homeButton,
+    .loginButton {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
