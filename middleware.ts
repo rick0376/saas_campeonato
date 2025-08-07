@@ -26,7 +26,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Verificar token para rotas protegidas
-  const token = await getToken({ req: request });
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
   if (!token) {
     console.log("Middleware - Sem token, redirecionando para login");
