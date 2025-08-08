@@ -2,12 +2,12 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "",
-  withCredentials: true, // importante para cookies de sessão
+  baseURL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+  withCredentials: true, // ✅ MANTIDO: Importante para cookies de sessão
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 10000, // ✅ NOVO: Timeout de 10 segundos
 });
 
 // ✅ MELHORADO: Interceptor para logs mais informativos

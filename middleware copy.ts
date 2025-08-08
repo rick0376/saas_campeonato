@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     "/jogos-publicos",
   ];
 
-  // Rotas de sistema que devem ser ignoradas
+  // Ignorar rotas do sistema e públicas
   if (
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/imagens/") ||
@@ -25,80 +25,70 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Verificar token para rotas protegidas
+  // Obter token JWT validado com secret
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
+  // Se não tem token, redirecionar para login
   if (!token) {
     console.log("Middleware - Sem token, redirecionando para login");
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // ✅ NOVO: Verificação específica para backup
+  // Tratamento robusto do clientId para detectar super admin
+  const clientId =
+    !token.clientId ||
+    token.clientId === "undefined" ||
+    token.clientId === "null"
+      ? null
+      : token.clientId;
+
+  // Verificação para rota /backup
   if (pathname === "/backup") {
-    // Super Admin sempre pode acessar
     if (token.role === "admin") {
       console.log("Middleware - Super Admin permitido em backup");
       return NextResponse.next();
     }
-
-    // Usuários normais também podem fazer backup de seus próprios dados
-    if (
-      token.clientId &&
-      token.clientId !== "undefined" &&
-      token.clientId !== "null"
-    ) {
+    if (clientId) {
       console.log(
         "Middleware - Cliente permitido em backup dos próprios dados"
       );
       return NextResponse.next();
     }
-
     console.log(
       "Middleware - Usuário sem cliente definido, negando acesso ao backup"
     );
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // ✅ CORREÇÃO: Verificação específica para gerar-jogos
+  // Verificação para rota /admin/gerar-jogos
   if (pathname === "/admin/gerar-jogos") {
-    // Se for super admin, permitir
     if (token.role === "admin") {
       console.log("Middleware - Super Admin permitido em gerar-jogos");
       return NextResponse.next();
     }
-
-    // Se não for admin, verificar permissões específicas
     try {
-      // Verificar se permissoes é string ou objeto
-      let permissoes;
-      if (typeof token.permissoes === "string") {
-        permissoes = JSON.parse(token.permissoes);
-      } else {
-        permissoes = token.permissoes || {};
-      }
+      const permissoes =
+        typeof token.permissoes === "string"
+          ? JSON.parse(token.permissoes)
+          : token.permissoes || {};
 
-      const temPermissao = permissoes["gerar-jogos"]?.["criar"] === true;
-
-      if (temPermissao) {
+      if (permissoes["gerar-jogos"]?.["criar"] === true) {
         console.log("Middleware - Usuário tem permissão para gerar-jogos");
         return NextResponse.next();
       }
     } catch (error) {
       console.log("Middleware - Erro ao verificar permissões:", error);
     }
-
     console.log("Middleware - Sem permissão para gerar-jogos");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Para outras rotas administrativas, verificar se é Super Admin
+  // Para outras rotas administrativas, somente super admins
   if (pathname.startsWith("/admin")) {
-    const clientId = token.clientId === "undefined" ? null : token.clientId;
-    const isSuperAdmin =
-      token.role === "admin" && (clientId === null || clientId === "undefined");
+    const isSuperAdmin = token.role === "admin" && clientId === null;
 
     if (!isSuperAdmin) {
       console.log("Middleware - Usuário não é Super Admin, redirecionando");
@@ -106,18 +96,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Permitir acesso autorizado
   console.log("Middleware - Permitindo acesso autorizado");
   return NextResponse.next();
 }
 
+// Define as rotas onde o middleware será aplicado
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * Aplica o middleware a todas as rotas, exceto as que:
+     * - iniciam com /api
+     * - são arquivos estáticos
+     * - são imagens otimizadas pelo Next.js
+     * - favicon
      */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
