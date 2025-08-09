@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     "/",
     "/auth/login",
-    "/cadastrar/clients",
+    //"/cadastrar/clients",
     "/api/clients/public",
     "/jogos-publicos",
   ];
