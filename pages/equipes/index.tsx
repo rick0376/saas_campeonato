@@ -87,7 +87,8 @@ export const getServerSideProps: GetServerSideProps<EquipesProps> = async (
     where: {
       ...(clientIdToFilter ? { clientId: clientIdToFilter } : {}),
     },
-    orderBy: [{ grupo: { nome: "asc" } }, { nome: "asc" }],
+    //orderBy: [{ grupo: { nome: "asc" } }, { nome: "asc" }],
+    orderBy: { id: "asc" },
     include: {
       grupo: {
         select: { id: true, nome: true },
