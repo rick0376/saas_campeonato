@@ -397,24 +397,27 @@ export const getServerSideProps: GetServerSideProps = async (
       queryClientId !== "undefined"
         ? queryClientId
         : isAdmin
-        ? undefined // admin principal sem filtro = todos clientes
+        ? undefined
         : (token.clientId as string);
 
     const filter = effectiveClientId ? { clientId: effectiveClientId } : {};
 
-    let permissions: any = {};
-    if (token.permissions) {
-      permissions =
-        typeof token.permissions === "string"
-          ? JSON.parse(token.permissions)
-          : token.permissions;
+    // ✅ Corrigido: usar sempre token.permissoes
+    let permissoes: any = {};
+    if (token.permissoes) {
+      permissoes =
+        typeof token.permissoes === "string"
+          ? JSON.parse(token.permissoes)
+          : token.permissoes;
     }
 
     let hasPermission = false;
-    if (typeof permissions === "object")
-      hasPermission = permissions.dashboard?.visualizar ?? false;
-    if (!hasPermission && (role === "admin" || role === "superadmin"))
+    if (typeof permissoes === "object") {
+      hasPermission = permissoes.dashboard?.visualizar ?? false;
+    }
+    if (!hasPermission && (role === "admin" || role === "superadmin")) {
       hasPermission = true;
+    }
 
     if (!hasPermission) {
       await prisma.$disconnect();
@@ -470,7 +473,6 @@ export const getServerSideProps: GetServerSideProps = async (
       jogos,
       eventos,
       chartJogos,
-      chartCartoes,
       chartArtilheiros,
       chartJogosDetalhes,
     ] = await Promise.all([
@@ -484,12 +486,7 @@ export const getServerSideProps: GetServerSideProps = async (
       prisma.eventoJogo.count({ where: filter }),
       prisma.jogo.findMany({
         where: { ...filter, placarA: { not: null }, placarB: { not: null } },
-        select: {
-          placarA: true,
-          placarB: true,
-          equipeA: { select: { nome: true } },
-          equipeB: { select: { nome: true } },
-        },
+        select: { placarA: true, placarB: true },
       }),
       prisma.eventoJogo.groupBy({
         by: ["tipo"],
@@ -501,14 +498,6 @@ export const getServerSideProps: GetServerSideProps = async (
         where: { ...filter, placarA: { not: null }, placarB: { not: null } },
         _sum: { placarA: true, placarB: true },
         orderBy: { rodada: "asc" },
-      }),
-      prisma.eventoJogo.groupBy({
-        by: ["tipo"],
-        where: {
-          ...filter,
-          tipo: { in: ["cartao_amarelo", "cartao_vermelho"] },
-        },
-        _count: { tipo: true },
       }),
       prisma.eventoJogo.groupBy({
         by: ["jogadorId"],
@@ -533,21 +522,18 @@ export const getServerSideProps: GetServerSideProps = async (
       0
     );
 
-    type EventoCount = { tipo: string; _count: { tipo: number } };
-    const eventosTyped = eventos as EventoCount[];
-    const eventCounts = eventosTyped.reduce<Record<string, number>>(
-      (acc, ev) => {
-        acc[ev.tipo] = ev._count.tipo;
-        return acc;
-      },
-      {}
-    );
+    const eventosPorTipo = (
+      eventos as { tipo: string; _count: { tipo: number } }[]
+    ).reduce<Record<string, number>>((acc, ev) => {
+      acc[ev.tipo] = ev._count.tipo;
+      return acc;
+    }, {});
 
     const progresso = totalJogos
       ? Math.round((jogosFinalizados / totalJogos) * 100)
       : 0;
 
-    const initialStats: DashboardStats = {
+    const initialStats = {
       totalJogos,
       jogosFinalizados,
       jogosAgendados,
@@ -558,16 +544,11 @@ export const getServerSideProps: GetServerSideProps = async (
       totalEventos,
       progresso,
       eventos: {
-        gols: eventCounts["gol"] ?? 0,
-        cartoesAmarelos: eventCounts["cartao_amarelo"] ?? 0,
-        cartoesVermelhos: eventCounts["cartao_vermelho"] ?? 0,
-        assistencias: eventCounts["assistencia"] ?? 0,
+        gols: eventosPorTipo["gol"] ?? 0,
+        cartoesAmarelos: eventosPorTipo["cartao_amarelo"] ?? 0,
+        cartoesVermelhos: eventosPorTipo["cartao_vermelho"] ?? 0,
+        assistencias: eventosPorTipo["assistencia"] ?? 0,
       },
-    };
-
-    const distribuicaoCartoes = {
-      amarelos: eventCounts["cartao_amarelo"] ?? 0,
-      vermelhos: eventCounts["cartao_vermelho"] ?? 0,
     };
 
     const golsPorRodada = chartJogos.map((item) => ({
@@ -575,9 +556,8 @@ export const getServerSideProps: GetServerSideProps = async (
       gols: (item._sum.placarA ?? 0) + (item._sum.placarB ?? 0),
     }));
 
-    const jogadorIds = chartArtilheiros.map((x) => x.jogadorId);
     const jogadoresInfo = await prisma.jogador.findMany({
-      where: { id: { in: jogadorIds } },
+      where: { id: { in: chartArtilheiros.map((x) => x.jogadorId) } },
       select: {
         id: true,
         nome: true,
@@ -599,33 +579,38 @@ export const getServerSideProps: GetServerSideProps = async (
 
     const golsEquipeMap = new Map<string, { nome: string; gols: number }>();
     for (const jogo of chartJogosDetalhes) {
-      const nomeA = jogo.equipeA.nome;
-      const nomeB = jogo.equipeB.nome;
+      if (!golsEquipeMap.has(jogo.equipeA.nome))
+        golsEquipeMap.set(jogo.equipeA.nome, {
+          nome: jogo.equipeA.nome,
+          gols: 0,
+        });
+      if (!golsEquipeMap.has(jogo.equipeB.nome))
+        golsEquipeMap.set(jogo.equipeB.nome, {
+          nome: jogo.equipeB.nome,
+          gols: 0,
+        });
 
-      if (!golsEquipeMap.has(nomeA))
-        golsEquipeMap.set(nomeA, { nome: nomeA, gols: 0 });
-      if (!golsEquipeMap.has(nomeB))
-        golsEquipeMap.set(nomeB, { nome: nomeB, gols: 0 });
-
-      golsEquipeMap.get(nomeA)!.gols += jogo.placarA ?? 0;
-      golsEquipeMap.get(nomeB)!.gols += jogo.placarB ?? 0;
+      golsEquipeMap.get(jogo.equipeA.nome)!.gols += jogo.placarA ?? 0;
+      golsEquipeMap.get(jogo.equipeB.nome)!.gols += jogo.placarB ?? 0;
     }
+
     const topEquipes = Array.from(golsEquipeMap.values())
       .sort((a, b) => b.gols - a.gols)
       .slice(0, 5);
 
-    const status = {
-      finalizados: initialStats.jogosFinalizados,
-      agendamento: initialStats.jogosAgendados,
-      emAndamento: initialStats.jogosEmAndamento,
-    };
-
-    const initialCharts: ChartsData = {
+    const initialCharts = {
       golsPorRodada,
-      distribuicaoCartoes,
+      distribuicaoCartoes: {
+        amarelos: eventosPorTipo["cartao_amarelo"] ?? 0,
+        vermelhos: eventosPorTipo["cartao_vermelho"] ?? 0,
+      },
       topArtilheiros,
       topEquipes,
-      status,
+      status: {
+        finalizados: initialStats.jogosFinalizados,
+        agendamento: initialStats.jogosAgendados,
+        emAndamento: initialStats.jogosEmAndamento,
+      },
     };
 
     await prisma.$disconnect();
