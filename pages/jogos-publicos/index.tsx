@@ -240,44 +240,6 @@ export default function JogosPublicos({
           </div>
 
           {/* Estatísticas */}
-          <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <Calendar size={20} />
-              </div>
-              <div className={styles.statContent}>
-                <span className={styles.statNumber}>{jogos.length}</span>
-                <span className={styles.statLabel}>Total de Jogos</span>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <Target size={20} />
-              </div>
-              <div className={styles.statContent}>
-                <span className={styles.statNumber}>{totalGols}</span>
-                <span className={styles.statLabel}>Gols Marcados</span>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <Clock size={20} />
-              </div>
-              <div className={styles.statContent}>
-                <span className={styles.statNumber}>{jogosFinalizados}</span>
-                <span className={styles.statLabel}>Jogos Finalizados</span>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <Users size={20} />
-              </div>
-              <div className={styles.statContent}>
-                <span className={styles.statNumber}>{equipes.length}</span>
-                <span className={styles.statLabel}>Equipes</span>
-              </div>
-            </div>
-          </div>
 
           {/* Navegação entre abas */}
           <div className={styles.tabsContainer}>
